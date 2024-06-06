@@ -15,7 +15,7 @@ Tara Dehdrai, Patricio Martinez, Duy Nguyen
 #### Load Data
 
 ```{r}
-df <- read.csv("/Users/usd-msads/Library/CloudStorage/OneDrive-UniversityofSanDiego/ADS-503/ParkinsonsPredictor_ADS503/parkinsons_updrs.data.csv")
+df <- read.csv("parkinsons_updrs.data.csv")
 
 motor_UPDRS <-df$motor_UPDRS
 total_UPDRS <-df$total_UPDRS
@@ -43,7 +43,7 @@ seed <- 123
 #### Data Types
 
 | Variable  | Definition                                                  | Data Type         |
-|------------|------------------------------|------------------------------|
+|-----------------|----------------------------|----------------------------|
 | subject   | Unique identifier for each subject which ranges from 1 - 31 | Numeric Data      |
 | sge       | Age of Subject                                              | Ordinal           |
 | sex       | Gender of Subject                                           | Categorical       |
