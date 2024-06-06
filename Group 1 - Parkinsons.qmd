@@ -1,0 +1,108 @@
+---
+title: "Group 1 Parkinsons Data Set"
+format: html
+editor: visual
+---
+
+## Group 1
+
+Tara Dehdrai, Patricio Martinez, Duy Nguyen
+
+## Problem Statement:
+
+##Draft problem statement being solved by the code
+
+#### Load Data
+
+```{r}
+df <- read.csv("/Users/usd-msads/Library/CloudStorage/OneDrive-UniversityofSanDiego/ADS-503/ParkinsonsPredictor_ADS503/parkinsons_updrs.data.csv")
+
+motor_UPDRS <-df$motor_UPDRS
+total_UPDRS <-df$total_UPDRS
+#Create dataframe of predictors, removing the index and dependent variables
+df_x <- df[c(2:5,8:23)]
+```
+
+#### Load Libraries
+
+```{r}
+library(caret)
+library(randomForest)
+library(tidyverse)
+library(ggplot2)
+library(earth)
+library(kernlab)
+theme_set(theme_minimal())
+
+#Set seed to reproduce samples
+seed <- 123
+```
+
+## Exploratory Data Analysis:
+
+#### Data Types
+
+| Variable  | Definition                                                  | Data Type         |
+|------------|------------------------------|------------------------------|
+| subject   | Unique identifier for each subject which ranges from 1 - 31 | Numeric Data      |
+| sge       | Age of Subject                                              | Ordinal           |
+| sex       | Gender of Subject                                           | Categorical       |
+| test_time | Time since recruitment into trial                           | Continuous        |
+|           | Motor UPDRS score                                           | Numeric Data Type |
+|           |                                                             |                   |
+|           |                                                             |                   |
+|           |                                                             |                   |
+|           |                                                             |                   |
+
+```{r}
+
+cor(df$motor_UPDRS, df$total_UPDRS)
+```
+
+Both predictors are highly correlated with a p-value of .9472.
+
+## Data pre-processing:
+
+```{r}
+
+#Evaluate data for NAs
+df_x_na <- apply(df_x, 2, function(x) {sum(is.na(x))})
+
+# Function to plot the distribution of a numeric variable
+plot_numeric_distribution <- function(df_x, var_name) {
+  ggplot(df_x, aes_string(var_name)) +
+    geom_histogram(binwidth = 0.5, fill = "blue", color = "black") +
+    ggtitle(paste("Distribution of", var_name)) +
+    xlab(var_name) +
+    ylab("Frequency")
+}
+
+# Function to plot the distribution of a factor variable
+plot_factor_distribution <- function(df_x, var_name) {
+  ggplot(df_x, aes_string(var_name)) +
+    geom_bar(fill = "blue", color = "black") +
+    ggtitle(paste("Distribution of", var_name)) +
+    xlab(var_name) +
+    ylab("Count")
+}
+
+# Loop through each column in the data frame and plot the distribution
+for (var_name in names(df_x)) {
+  if (is.numeric(df_x[[var_name]])) {
+    print(plot_numeric_distribution(df_x, var_name))
+  } else if (is.factor(df_x[[var_name]])) {
+    print(plot_factor_distribution(df_x, var_name))
+  }
+}
+```
+
+```{r}
+```
+
+## Data Splitting:
+
+## Model Building Strategy:
+
+## Model Performance and Hyper Parameter Turning:
+
+## Results and final selection
