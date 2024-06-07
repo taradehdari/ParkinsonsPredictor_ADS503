@@ -6,22 +6,11 @@ editor: visual
 
 ## Group 1
 
-Tara Dehdrai, Patricio Martinez, Duy Nguyen
+Tara Dehdari, Patricio Martinez, Duy Nguyen
 
 ## Problem Statement:
 
 ##Draft problem statement being solved by the code
-
-#### Load Data
-
-```{r}
-df <- read.csv("parkinsons_updrs.data.csv")
-
-motor_UPDRS <-df$motor_UPDRS
-total_UPDRS <-df$total_UPDRS
-#Create dataframe of predictors, removing the index and dependent variables
-df_x <- df[c(2:5,8:23)]
-```
 
 #### Load Libraries
 
@@ -32,34 +21,165 @@ library(tidyverse)
 library(ggplot2)
 library(earth)
 library(kernlab)
+library(dplyr)
+library(corrplot)
 theme_set(theme_minimal())
 
 #Set seed to reproduce samples
 seed <- 123
 ```
 
+#### Load Data
+
+```{r}
+df <- read.csv("parkinsons_updrs.data.csv")
+head(df)
+
+#motor_UPDRS <-df$motor_UPDRS
+#total_UPDRS <-df$total_UPDRS
+#Create dataframe of predictors, removing the index and dependent variables
+#df_x <- df[c(2:5,8:23)]
+
+#head(df_x)
+```
+
 ## Exploratory Data Analysis:
 
 #### Data Types
 
-| Variable  | Definition                                                  | Data Type         |
-|-----------------|----------------------------|----------------------------|
-| subject   | Unique identifier for each subject which ranges from 1 - 31 | Numeric Data      |
-| sge       | Age of Subject                                              | Ordinal           |
-| sex       | Gender of Subject                                           | Categorical       |
-| test_time | Time since recruitment into trial                           | Continuous        |
-|           | Motor UPDRS score                                           | Numeric Data Type |
-|           |                                                             |                   |
-|           |                                                             |                   |
-|           |                                                             |                   |
-|           |                                                             |                   |
+```{r}
+str(df)
+```
+```{r}
+summary(df)
+```
+#### Missing Values
+
+```{r}
+sum(is.na(df))
+```
+
+#### Visualizations
+
+```{r}
+# Age distribution
+ggplot(df, aes(x = age)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  theme_minimal() +
+  labs(title = "Age Distribution of Patients", x = "Age", y = "Count")
+
+# Total UPDRS distribution
+ggplot(df, aes(x = total_UPDRS)) +
+  geom_histogram(binwidth = 5, fill = "green", color = "black") +
+  theme_minimal() +
+  labs(title = "Distribution of Total UPDRS Scores", x = "Total UPDRS", y = "Count")
+
+# Age vs. Total UPDRS
+ggplot(df, aes(x = age, y = total_UPDRS)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Age vs. Total UPDRS", x = "Age", y = "Total UPDRS")
+```
+```{r}
+# Count the number of males and females
+sex_count <- df %>% 
+  group_by(sex) %>%
+  summarise(count = n())
+
+# Convert 'sex' to factor for better labeling
+sex_count$sex <- factor(sex_count$sex, labels = c("Female", "Male"))
+
+# Create a bar plot for the distribution of males and females
+ggplot(sex_count, aes(x = sex, y = count, fill = sex)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Distribution of Males and Females", x = "Sex", y = "Count") +
+  scale_fill_manual(values = c("Female" = "pink", "Male" = "blue"))
+```
+## Preprocessing
+
+#### Normalize the Dataset
+
+```{r}
+# gather numeric columns
+numeric_cols <- sapply(df, is.numeric)
+
+# normalizing the numerical features
+df[numeric_cols] <- lapply(df[numeric_cols], scale)
+```
+
+#### Resampling Female and Male
+
+```{r}
+# determine the minimum count
+min_count <- min(sex_count$count)
+
+# downsample the majority class 
+df_downsample <- df %>%
+  group_by(sex) %>%
+  sample_n(min_count)
+
+# Visualizing new amount of male and female
+
+# Count the number of males and females after downsampling
+sex_count_downsampled <- df_downsample %>%
+  group_by(sex) %>%
+  summarise(count = n())
+
+# Convert 'sex' to factor for better labeling
+sex_count_downsampled$sex <- factor(sex_count_downsampled$sex, labels = c("Female", "Male"))
+
+# Create a bar plot for the distribution of males and females after downsampling
+ggplot(sex_count_downsampled, aes(x = sex, y = count, fill = sex)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Distribution of Males and Females after Downsampling", x = "Sex", y = "Count") +
+  scale_fill_manual(values = c("Female" = "pink", "Male" = "blue"))
+```
+
+#### Heatmap Correlation
+
+```{r}
+correlations <- cor(df)
+
+corrplot(correlations, order = "hclust")
+
+print(correlations)
+```
+##### Removing High Correlations
 
 ```{r}
 
-cor(df$motor_UPDRS, df$total_UPDRS)
+# find highly correlated predictors
+highCorr <- findCorrelation(correlations, cutoff = 0.80)
+cat("The amount of high correlations:", length(highCorr), "\n")
+cat("\n")
+cat ("Values with high correlations: \n")
+cat(highCorr)
+
+```
+```{r}
+# removing high correlations
+filtered_df <- df[,-highCorr]
+
+# correlation heatmap again 
+correlationsFiltered <- cor(filtered_df)
+corrplot(correlationsFiltered, order = "hclust")
 ```
 
-Both predictors are highly correlated with a p-value of .9472.
+## Data Splitting:
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Data pre-processing:
 
@@ -99,7 +219,7 @@ for (var_name in names(df_x)) {
 ```{r}
 ```
 
-## Data Splitting:
+
 
 ## Model Building Strategy:
 
