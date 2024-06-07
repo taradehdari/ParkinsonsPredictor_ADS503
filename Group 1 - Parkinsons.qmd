@@ -35,12 +35,6 @@ seed <- 123
 df <- read.csv("parkinsons_updrs.data.csv")
 head(df)
 
-#motor_UPDRS <-df$motor_UPDRS
-#total_UPDRS <-df$total_UPDRS
-#Create dataframe of predictors, removing the index and dependent variables
-#df_x <- df[c(2:5,8:23)]
-
-#head(df_x)
 ```
 
 ## Exploratory Data Analysis:
@@ -53,6 +47,10 @@ str(df)
 ```{r}
 summary(df)
 ```
+```{r}
+dim(df)
+```
+
 #### Missing Values
 
 ```{r}
@@ -166,62 +164,84 @@ filtered_df <- df[,-highCorr]
 correlationsFiltered <- cor(filtered_df)
 corrplot(correlationsFiltered, order = "hclust")
 ```
+```{r}
+# Print dimensions of filtered dataset and original dataset
+cat("Original data dimensions:", dim(df), "\n")
+cat("Filtered data dimensions:", dim(filtered_df), "\n")
+```
+
+#### Outlier Check
+
+Calculating what would be considered an outlier shows that there are quiet a few but looking at the boxplots nothing is significant enought to withdraw from the dataset. 
+
+```{r}
+# Boxplot for each numerical variable
+boxplot(df[,numeric_cols], outline=TRUE, col="lightblue", main="Boxplot of Numerical Variables")
+
+# Function to detect outliers using IQR method
+detect_outliers <- function(x) {
+  q1 <- quantile(x, 0.25)
+  q3 <- quantile(x, 0.75)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers <- x < lower_bound | x > upper_bound
+  return(outliers)
+}
+
+# Apply the function to each numerical variable
+outliers <- apply(df[,numeric_cols], 2, detect_outliers)
+
+# Count the number of outliers for each variable
+outlier_counts <- colSums(outliers)
+outlier_counts
+```
+
+#### Visualizing Target Variable (total_UPDRS (Unified Parkinson's Disease Rating Scale Score))
+
+```{r}
+# Visualize the distribution of total_UPDRS with density plot
+ggplot(filtered_df, aes(x = total_UPDRS)) +
+  geom_density(fill = "green", color = "black") +
+  theme_minimal() +
+  labs(title = "Density Plot of Total UPDRS Scores", x = "Total UPDRS", y = "Density")
+
+```
+#### Relationships between target and predictor variables
+
+```{r}
+# Select predictor variables (all columns except total_UPDRS)
+predictor_vars <- filtered_df[, !colnames(filtered_df) %in% "total_UPDRS"]
+
+# Create scatter plots for each predictor variable against total_UPDRS
+for (var in colnames(predictor_vars)) {
+  p <- ggplot(filtered_df, aes_string(x = var, y = "total_UPDRS")) +
+    geom_point(alpha = 0.5) +
+    theme_minimal() +
+    labs(title = paste("Scatter Plot of", var, "vs. Total UPDRS"), 
+         x = var, y = "Total UPDRS")
+  
+  print(p)
+}
+```
+
 
 ## Data Splitting:
 
-
-
-
-
-
-
-
-
-
-
-
-
-## Data pre-processing:
-
 ```{r}
+# Split the data into training and test sets (80% train, 20% test)
+set.seed(123)
+trainIndex <- createDataPartition(filtered_df$total_UPDRS, p = 0.8, list = FALSE)
+df_train <- filtered_df[trainIndex, ]
+df_test <- filtered_df[-trainIndex, ]
 
-#Evaluate data for NAs
-df_x_na <- apply(df_x, 2, function(x) {sum(is.na(x))})
+# Print dimensions of training and test sets
+cat("Training data dimensions:", dim(df_train), "\n")
+cat("Test data dimensions:", dim(df_test), "\n")
 
-# Function to plot the distribution of a numeric variable
-plot_numeric_distribution <- function(df_x, var_name) {
-  ggplot(df_x, aes_string(var_name)) +
-    geom_histogram(binwidth = 0.5, fill = "blue", color = "black") +
-    ggtitle(paste("Distribution of", var_name)) +
-    xlab(var_name) +
-    ylab("Frequency")
-}
-
-# Function to plot the distribution of a factor variable
-plot_factor_distribution <- function(df_x, var_name) {
-  ggplot(df_x, aes_string(var_name)) +
-    geom_bar(fill = "blue", color = "black") +
-    ggtitle(paste("Distribution of", var_name)) +
-    xlab(var_name) +
-    ylab("Count")
-}
-
-# Loop through each column in the data frame and plot the distribution
-for (var_name in names(df_x)) {
-  if (is.numeric(df_x[[var_name]])) {
-    print(plot_numeric_distribution(df_x, var_name))
-  } else if (is.factor(df_x[[var_name]])) {
-    print(plot_factor_distribution(df_x, var_name))
-  }
-}
 ```
 
-```{r}
-```
-
-
-
-## Model Building Strategy:
+## Model Building:
 
 ## Model Performance and Hyper Parameter Turning:
 
