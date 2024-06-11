@@ -230,7 +230,7 @@ for (var in colnames(predictor_vars)) {
 
 ```{r}
 # Split the data into training and test sets (80% train, 20% test)
-set.seed(123)
+set.seed(seed)
 trainIndex <- createDataPartition(filtered_df$total_UPDRS, p = 0.8, list = FALSE)
 df_train <- filtered_df[trainIndex, ]
 df_test <- filtered_df[-trainIndex, ]
@@ -250,11 +250,63 @@ cat("Test data dimensions:", dim(df_test), "\n")
 linear_model <- lm(total_UPDRS ~ .,
                    data = df_train)
 
+linear_model
+
 # predict linear model
 linear_predictions <- predict(linear_model, 
                               df_test)
 
+linear_predictions
+
 ```
+
+#### Random Forest
+
+```{r}
+# set seed for reproducibiltiy
+set.seed(seed)
+
+# train random forest model
+rf_model <- randomForest(total_UPDRS ~ .,
+                         data = df_train,
+                         importance = TRUE,
+                         ntree = 500)
+rf_model
+
+# predict random forest model
+rf_predictions <- predict(rf_model, df_test)
+
+rf_predictions
+```
+
+
+#### Support Vector Machine
+
+```{r}
+
+```
+
+
+#### MARS
+
+```{r}
+
+```
+
+
+#### Gradient Boosting Machine
+
+```{r}
+
+```
+
+
+#### Neural Network
+
+```{r}
+
+```
+
 
 ## Evaluation Metrics
 
@@ -281,7 +333,16 @@ evaluate_model <- function(true_values, predictions) {
 # evaluation metrics for linear regression
 linear_metrics <- evaluate_model(df_test$total_UPDRS, linear_predictions)
 
+# evaluation metrics for random forest 
+rf_metrics <- evaluate_model(df_test$total_UPDRS, rf_predictions)
 
+# evaluation metrics for support vector machine
+
+# evaluation metrics for MARS
+
+# evaluation metrics for Gradient Boosting Machine
+
+# evaluation metrics for neural network
 ```
 
 #### Store Evaluation Results in DataFrame
@@ -294,9 +355,20 @@ testResults <- rbind(testResults, data.frame(Model = "Linear Regression",
                                              Rsquared = linear_metrics["Rsquared"]))
 
 
+# store results for random forest 
+testResults <- rbind(testResults, data.frame(Model = "Random Forest", 
+                                             RMSE = rf_metrics["RMSE"], 
+                                             MAE = rf_metrics["MAE"], 
+                                             Rsquared = rf_metrics["Rsquared"]))
+
+# store results for support vector machine
+
+# store results for MARS
+
+# store results for Gradient Boosting Machine
+
+# store results for neural network 
 ```
 
 
-
-
-## Results and final selection
+## Results 
