@@ -439,3 +439,12 @@ print(testResults)
 
 
 ## Results 
+
+RMSE measures the square root of the average squared differences between the predicted and actual values, so lower values are better. MAE measures the average absolute differences betweem the predicted and actual values, so lower values are also better. R-squared indicates how well the independent variables explain the variability of the dependent variable. Higher values are better (closer to 1). 
+Based off of these Random Forest would be our best model. It has the lowers RMSE and MAE and the highest R-squared. This indicates that Random Forest model performs the best in predicting the 'total_UPDRS' scores with the highest accuracy and lowest prediction error. GBM also performs well at second best but still not as good as random forests model. 
+
+Our recommendation is to use the Random Forest model for predicting the progrssion of Parkinson's disases as it provides the best model based on the evaluation metrics. 
+
+## Hyperparameter Tuning
+
+
