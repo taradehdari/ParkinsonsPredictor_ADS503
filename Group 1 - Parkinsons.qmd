@@ -322,7 +322,6 @@ gbm_model <- train(total_UPDRS ~ .,
                    data = df_train, 
                    method = "gbm", 
                    trControl = trainControl(method = "cv", number = 5))
-yes
 gbm_model
 
 # predict GBM model
@@ -337,9 +336,15 @@ gbm_predictions <- predict(gbm_model, df_test)
 set.seed(seed)
 
 # train NNET model
-
+nn_model <- train(total_UPDRS ~ ., 
+                  data = df_train, 
+                  method = "nnet", 
+                  trControl = trainControl(method = "cv", number = 5), 
+                  linout = TRUE, trace = FALSE)
+nn_model
 
 # predict NNET model
+nn_predictions <- predict(nn_model, df_test)
 ```
 
 
@@ -380,8 +385,8 @@ mars_metrics <- evaluate_model(df_test$total_UPDRS, mars_predictions)
 # evaluation metrics for Gradient Boosting Machine
 gbm_metrics <- evaluate_model(df_test$total_UPDRS, gbm_predictions)
 
-
 # evaluation metrics for neural network
+nn_metrics <- evaluate_model(df_test$total_UPDRS, nn_predictions)
 ```
 
 #### Store Evaluation Results in DataFrame
@@ -421,7 +426,14 @@ testResults <- rbind(testResults, data.frame(Model = "GBM",
                                              Rsquared = gbm_metrics["Rsquared"]))
 
 
-# store results for neural network 
+# store results for neural network
+testResults <- rbind(testResults, data.frame(Model = "Neural Network", 
+                                             RMSE = nn_metrics["RMSE"], 
+                                             MAE = nn_metrics["MAE"], 
+                                             Rsquared = nn_metrics["Rsquared"]))
+
+# print results
+print(testResults)
 
 ```
 
