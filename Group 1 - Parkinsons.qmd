@@ -10,7 +10,7 @@ Tara Dehdari, Patricio Martinez, Duy Nguyen
 
 ## Problem Statement:
 
-##Draft problem statement being solved by the code
+
 
 #### Load Libraries
 
@@ -243,6 +243,60 @@ cat("Test data dimensions:", dim(df_test), "\n")
 
 ## Model Building:
 
-## Model Performance and Hyper Parameter Turning:
+#### Linear Regression
+
+```{r}
+# train linear moddel
+linear_model <- lm(total_UPDRS ~ .,
+                   data = df_train)
+
+# predict linear model
+linear_predictions <- predict(linear_model, 
+                              df_test)
+
+```
+
+## Evaluation Metrics
+
+```{r}
+# Initialize empty dataframe to store results
+testResults <- data.frame(Model = character(),
+                          RMSE = numeric(),
+                          MAE = numeric(),
+                          Rsquared = numeric(),
+                          stringsAsFactors = FALSE)
+
+# Function to calculate evaluation metrics
+evaluate_model <- function(true_values, predictions) {
+  rmse <- sqrt(mean((predictions - true_values)^2))
+  mae <- mean(abs(predictions - true_values))
+  rsquared <- 1 - sum((predictions - true_values)^2) / sum((true_values - mean(true_values))^2)
+  return(c(RMSE = rmse, MAE = mae, Rsquared = rsquared))
+}
+```
+
+#### Calculate Evaluation Metrics for Each Model
+
+```{r}
+# evaluation metrics for linear regression
+linear_metrics <- evaluate_model(df_test$total_UPDRS, linear_predictions)
+
+
+```
+
+#### Store Evaluation Results in DataFrame
+
+```{r}
+# store results for linear regression
+testResults <- rbind(testResults, data.frame(Model = "Linear Regression", 
+                                             RMSE = linear_metrics["RMSE"], 
+                                             MAE = linear_metrics["MAE"], 
+                                             Rsquared = linear_metrics["Rsquared"]))
+
+
+```
+
+
+
 
 ## Results and final selection
