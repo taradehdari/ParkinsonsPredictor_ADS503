@@ -302,10 +302,12 @@ svm_predictions <- predict(svm_model,
 set.seed(seed)
 
 # train MARS model
+mars_model <- earth(total_UPDRS ~ ., data = df_train)
 
+mars_model
 
 # predict MARS model
-
+mars_predictions <- predict(mars_model, df_test)
 ```
 
 
@@ -367,6 +369,7 @@ rf_metrics <- evaluate_model(df_test$total_UPDRS, rf_predictions)
 svm_metrics <- evaluate_model(df_test$total_UPDRS, svm_predictions)
 
 # evaluation metrics for MARS
+mars_metrics <- evaluate_model(df_test$total_UPDRS, mars_predictions)
 
 # evaluation metrics for Gradient Boosting Machine
 
@@ -397,6 +400,11 @@ testResults <- rbind(testResults, data.frame(Model = "Support Vector Machine",
 
 
 # store results for MARS
+testResults <- rbind(testResults, data.frame(Model = "MARS", 
+                                             RMSE = mars_metrics["RMSE"], 
+                                             MAE = mars_metrics["MAE"], 
+                                             Rsquared = mars_metrics["Rsquared"]))
+
 
 # store results for Gradient Boosting Machine
 
