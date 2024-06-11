@@ -23,6 +23,7 @@ library(earth)
 library(kernlab)
 library(dplyr)
 library(corrplot)
+library(Metrics)
 theme_set(theme_minimal())
 
 #Set seed to reproduce samples
@@ -256,8 +257,6 @@ linear_model
 linear_predictions <- predict(linear_model, 
                               df_test)
 
-linear_predictions
-
 ```
 
 #### Random Forest
@@ -275,21 +274,37 @@ rf_model
 
 # predict random forest model
 rf_predictions <- predict(rf_model, df_test)
-
-rf_predictions
 ```
 
 
 #### Support Vector Machine
 
 ```{r}
+# set seed for reproducibiltiy
+set.seed(seed)
 
+# train SVM model
+svm_model <- ksvm(total_UPDRS ~ ., 
+                  data = df_train, 
+                  kernel = "rbfdot")
+svm_model
+
+# predict SVM model
+svm_predictions <- predict(svm_model, 
+                           df_test)
 ```
 
 
 #### MARS
 
 ```{r}
+# set seed for reproducibiltiy
+set.seed(seed)
+
+# train MARS model
+
+
+# predict MARS model
 
 ```
 
@@ -297,14 +312,26 @@ rf_predictions
 #### Gradient Boosting Machine
 
 ```{r}
+# set seed for reproducibiltiy
+set.seed(seed)
 
+# train GBM model
+
+
+# predict GBM model
 ```
 
 
 #### Neural Network
 
 ```{r}
+# set seed for reproducibiltiy
+set.seed(seed)
 
+# train NNET model
+
+
+# predict NNET model
 ```
 
 
@@ -337,6 +364,7 @@ linear_metrics <- evaluate_model(df_test$total_UPDRS, linear_predictions)
 rf_metrics <- evaluate_model(df_test$total_UPDRS, rf_predictions)
 
 # evaluation metrics for support vector machine
+svm_metrics <- evaluate_model(df_test$total_UPDRS, svm_predictions)
 
 # evaluation metrics for MARS
 
@@ -362,6 +390,11 @@ testResults <- rbind(testResults, data.frame(Model = "Random Forest",
                                              Rsquared = rf_metrics["Rsquared"]))
 
 # store results for support vector machine
+testResults <- rbind(testResults, data.frame(Model = "Support Vector Machine", 
+                                             RMSE = svm_metrics["RMSE"], 
+                                             MAE = svm_metrics["MAE"], 
+                                             Rsquared = svm_metrics["Rsquared"]))
+
 
 # store results for MARS
 
