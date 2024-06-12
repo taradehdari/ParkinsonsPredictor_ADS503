@@ -10,7 +10,7 @@ Tara Dehdari, Patricio Martinez, Duy Nguyen
 
 ## Problem Statement:
 
-
+The goal is to develop a robust predictive model to accurately predict the progression of Parkinson's disease as measured by the Unified Parkinson's Disease Rating Scale (UPDRS) based on telemonitoring data, and to dientify the most influential features contributing to the prediction. 
 
 #### Load Libraries
 
@@ -438,13 +438,68 @@ print(testResults)
 ```
 
 
-## Results 
+## Results of Model Building
 
-RMSE measures the square root of the average squared differences between the predicted and actual values, so lower values are better. MAE measures the average absolute differences betweem the predicted and actual values, so lower values are also better. R-squared indicates how well the independent variables explain the variability of the dependent variable. Higher values are better (closer to 1). 
+RMSE measures the square root of the average squared differences between the predicted and actual values, so lower values are better. MAE measures the average absolute differences between the predicted and actual values, so lower values are also better. R-squared indicates how well the independent variables explain the variability of the dependent variable. Higher values are better (closer to 1). 
 Based off of these Random Forest would be our best model. It has the lowers RMSE and MAE and the highest R-squared. This indicates that Random Forest model performs the best in predicting the 'total_UPDRS' scores with the highest accuracy and lowest prediction error. GBM also performs well at second best but still not as good as random forests model. 
 
-Our recommendation is to use the Random Forest model for predicting the progrssion of Parkinson's disases as it provides the best model based on the evaluation metrics. 
+Our recommendation is to use the Random Forest model for predicting the progression of Parkinson's diseases as it provides the best model based on the evaluation metrics. 
 
 ## Hyperparameter Tuning
 
+```{r}
+# set up train control for cross-validation
+set.seed(seed)
+ctrl <- trainControl(method = "cv", number = 5)
+
+# define the grid of hyperparameters to search
+tune_grid <- expand.grid(mtry = c(2, 3, 6, 8, 10, 12, 13, 15))
+
+# Perform hyperparameter tuning
+set.seed(123)
+rf_tuned <- train(total_UPDRS ~ ., data = df_train, 
+                  method = "rf", 
+                  trControl = ctrl, 
+                  tuneGrid = tune_grid)
+
+# Print the best parameters
+print(rf_tuned$bestTune)
+
+# Plot the results of hyperparameter tuning
+plot(rf_tuned)
+```
+```{r}
+# Predict on test data using the tuned model
+rf_tuned_predictions <- predict(rf_tuned, df_test)
+
+# Evaluate the tuned model
+evaluate_model <- function(true_values, predictions) {
+  rmse <- sqrt(mean((predictions - true_values)^2))
+  mae <- mean(abs(predictions - true_values))
+  rsquared <- 1 - sum((predictions - true_values)^2) / sum((true_values - mean(true_values))^2)
+  return(c(RMSE = rmse, MAE = mae, Rsquared = rsquared))
+}
+
+rf_tuned_metrics <- evaluate_model(df_test$total_UPDRS, rf_tuned_predictions)
+
+# Print the evaluation metrics for the tuned model
+rf_tuned_metrics
+```
+
+## Feature Importance
+
+```{r}
+# Extract feature importance from the tuned Random Forest model
+rf_importance <- varImp(rf_tuned, scale = FALSE)
+
+# Print the feature importance
+print(rf_importance)
+
+# Plot the feature importance
+plot(rf_importance, top = 10, main = "Top 10 Feature Importance - Random Forest")
+```
+
+## Final Results
+
+Based on the hyper parameter tuning, the best model configuration for the Random Forest was found with 'mtry= 13', yielding an RMSE of  0.0321, and MAE of 0.0134, and an R-squared of 0.9990, indicating excellent predictive performance. The most influential features in predicting the Unified Parkinson's Disease Rating Scale (UPDRS) scores were subject, age, test time, sex and RPDE. These results suggest that the model can accurately predict disease progression using telemonitoring data, with the mentioned features plating a crucial role. 
 
